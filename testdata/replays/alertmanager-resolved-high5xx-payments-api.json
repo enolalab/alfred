@@ -1,0 +1,56 @@
+{
+  "id": "alertmanager-resolved-high5xx-payments-api",
+  "description": "Alertmanager resolved payload for high 5xx rate on payments-api in prod-eu",
+  "input": {
+    "kind": "alertmanager_payload",
+    "payload": {
+      "version": "4",
+      "groupKey": "prod-eu:High5xxRate:payments-api",
+      "status": "resolved",
+      "receiver": "alfred",
+      "groupLabels": {
+        "alertname": "High5xxRate"
+      },
+      "commonLabels": {
+        "alertname": "High5xxRate",
+        "cluster": "prod-eu",
+        "namespace": "payments",
+        "deployment": "payments-api",
+        "severity": "critical"
+      },
+      "commonAnnotations": {
+        "summary": "5xx rate recovered on payments-api",
+        "description": "Alert resolved in prod-eu"
+      },
+      "alerts": [
+        {
+          "status": "resolved",
+          "startsAt": "2026-04-02T10:00:00Z",
+          "endsAt": "2026-04-02T10:30:00Z",
+          "fingerprint": "fp-1"
+        }
+      ]
+    }
+  },
+  "expectations": {
+    "cluster": "prod-eu",
+    "namespace": "payments",
+    "resource_kind": "deployment",
+    "resource_name": "payments-api",
+    "incident_type": "high_5xx_or_latency",
+    "must_reference": [
+      "Summary",
+      "Confidence"
+    ],
+    "must_not_reference": [
+      "I changed production",
+      "I rolled back",
+      "incident is still firing"
+    ],
+    "evidence_themes": [
+      "closure summary",
+      "resolved alert lifecycle",
+      "residual risk"
+    ]
+  }
+}

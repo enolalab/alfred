@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alfred
+  namespace: alfred-lab
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: alfred
+  template:
+    metadata:
+      labels:
+        app: alfred
+    spec:
+      serviceAccountName: alfred
+      containers:
+        - name: alfred
+          image: debian:12-slim
+          command: ["/usr/local/bin/alfred", "serve"]
+          env:
+            - name: ALFRED_CONFIG
+              value: /etc/alfred/config.yml
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/certs/ca-certificates.crt
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: alfred-secrets
+                  key: OPENROUTER_API_KEY
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: alfred-secrets
+                  key: TELEGRAM_BOT_TOKEN
+          ports:
+            - containerPort: 8080
+              hostPort: 8080
+          volumeMounts:
+            - name: alfred-binary
+              mountPath: /usr/local/bin/alfred
+              readOnly: true
+            - name: host-ca-bundle
+              mountPath: /etc/ssl/certs/ca-certificates.crt
+              readOnly: true
+            - name: config
+              mountPath: /etc/alfred
+            - name: audit
+              mountPath: /var/log/alfred
+      volumes:
+        - name: alfred-binary
+          hostPath:
+            path: /usr/local/bin/alfred
+            type: File
+        - name: host-ca-bundle
+          hostPath:
+            path: /etc/ssl/certs/ca-certificates.crt
+            type: File
+        - name: config
+          configMap:
+            name: alfred-config
+        - name: audit
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alfred
+  namespace: alfred-lab
+spec:
+  selector:
+    app: alfred
+  ports:
+    - port: 8080
+      targetPort: 8080

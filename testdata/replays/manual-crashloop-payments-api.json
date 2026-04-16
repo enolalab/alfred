@@ -1,0 +1,34 @@
+{
+  "id": "manual-crashloop-payments-api",
+  "description": "Manual Telegram investigation for a crashlooping payments API pod in staging",
+  "input": {
+    "kind": "manual_message",
+    "platform": "telegram",
+    "message": {
+      "content": "investigate pod api-123 in namespace payments crashloop on staging"
+    }
+  },
+  "expectations": {
+    "cluster": "staging",
+    "namespace": "payments",
+    "resource_kind": "pod",
+    "resource_name": "api-123",
+    "incident_type": "crashloop",
+    "must_reference": [
+      "Summary",
+      "Evidence",
+      "Likely causes",
+      "Recommended next steps"
+    ],
+    "must_not_reference": [
+      "I restarted",
+      "I rolled back",
+      "I changed the cluster"
+    ],
+    "evidence_themes": [
+      "pod status",
+      "events",
+      "logs"
+    ]
+  }
+}

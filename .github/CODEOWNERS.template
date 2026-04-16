@@ -1,0 +1,10 @@
+# Replace the placeholder owners below with real GitHub users or teams,
+# then save the result as .github/CODEOWNERS.
+
+# Example:
+# * @your-org/platform-team
+
+docs/release-signoffs/* @replace-me/platform-owners @replace-me/release-managers
+docs/release-signoff-governance.md @replace-me/platform-owners @replace-me/release-managers
+.github/workflows/release-readiness.yml @replace-me/platform-owners @replace-me/release-managers
+

@@ -1,0 +1,132 @@
+# Alfred Configuration
+# Paths: ./configs/config.yml or ~/.alfred/config.yml
+# Env vars override file values.
+
+# LLM Provider
+llm:
+  provider: anthropic             # anthropic | gemini | openrouter | openai
+  api_key: ""                     # or use ANTHROPIC_API_KEY / GEMINI_API_KEY / OPENROUTER_API_KEY / OPENAI_API_KEY env var
+  base_url: ""                    # optional for openai provider; set to an OpenAI-compatible endpoint
+  model: claude-sonnet-4-20250514 # model ID passed to the provider API
+
+# Agent defaults
+agent:
+  name: Alfred
+  system_prompt: |
+    You are Alfred, a helpful autonomous AI assistant.
+    You have access to tools to execute commands.
+    Be concise and helpful.
+  max_tokens: 4096
+  temperature: 0.7
+  max_turns: 10
+
+# Tools
+tools:
+  shell:
+    enabled: true
+    enabled_in: [chat, serve]      # command modes allowed to invoke this tool
+    allowlist: []                  # if non-empty, ONLY these commands allowed
+    denylist:                      # blocked unless allowlist is set
+      - rm
+      - mkfs
+      - dd
+      - shutdown
+      - reboot
+    require_confirmation: true     # prompt user before executing
+  read_file:
+    enabled: true
+    enabled_in: [chat, serve]
+    root_dir: .
+    max_bytes: 16384
+  kubernetes:
+    enabled: false
+    enabled_in: [serve]
+    mode: auto
+    default_cluster: staging
+    kubeconfig_path: ""
+    context: ""
+    namespace_allowlist: []
+    max_pods: 20
+    max_events: 30
+    max_log_lines: 200
+    max_log_bytes: 16384
+    log_since: 15m
+  prometheus:
+    enabled: false
+    enabled_in: [serve]
+    mode: auto
+    base_url: ""
+    bearer_token: ""
+    default_cluster: staging
+    timeout: 10s
+    max_series: 10
+    max_samples: 120
+    default_step: 1m
+    default_lookback: 15m
+    circuit_break_threshold: 5
+    circuit_break_cooldown: 30s
+
+# Optional named cluster profiles.
+# Global tools.* keeps enablement/runtime limits.
+# Each profile can override connection details for a specific cluster.
+clusters: []
+#  - name: staging
+#    kubernetes:
+#      mode: in_cluster
+#      kubeconfig_path: ""
+#      context: ""
+#      namespace_allowlist: [payments, checkout]
+#    prometheus:
+#      mode: in_cluster
+#      base_url: http://prometheus-operated.monitoring.svc:9090
+#      bearer_token: ""
+
+# Reliability
+reliability:
+  alertmanager:
+    dedupe_enabled: true
+    dedupe_ttl: 5m
+    rate_limit_enabled: false
+    rate_limit_window: 1m
+    rate_limit_max_events: 30
+
+# Security
+security:
+  audit:
+    enabled: true
+    path: audit.jsonl              # append-only JSON Lines audit log
+
+# Telegram
+telegram:
+  enabled: false
+  bot_token: ""                    # or use TELEGRAM_BOT_TOKEN env var
+  api_base_url: ""                 # optional override for mock Telegram or custom gateway
+  timeout: 10s
+  max_attempts: 3
+  base_backoff: 200ms
+  circuit_break_threshold: 5
+  circuit_break_cooldown: 30s
+
+alertmanager:
+  enabled: false
+  agent_id: ""                     # optional dedicated agent for structured alert intake
+  telegram_chat_id: ""            # if set, alert conversations are routed to this Telegram chat
+
+# Gateway (multi-platform server mode: alfred serve)
+gateway:
+  enabled: false
+  addr: ":8080"
+  read_timeout: 30s
+  write_timeout: 60s
+  shutdown_timeout: 30s
+  queue:
+    size: 100
+    workers: 5
+  session:
+    ttl: 30m
+    cleanup_interval: 5m
+  heartbeat:
+    enabled: false
+    file_path: HEARTBEAT.md        # checklist file for proactive tasks
+    interval: 30m                  # how often to check
+    agent_id: ""                   # override default agent (empty = default)

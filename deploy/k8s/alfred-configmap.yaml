@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alfred-config
+  namespace: alfred
+  labels:
+    app.kubernetes.io/name: alfred
+data:
+  config.yml: |
+    # Replace this with a production-specific Alfred config.
+    # Start from configs/config.production.example.yml.
+    llm:
+      provider: anthropic
+      api_key: ""
+      model: claude-sonnet-4-20250514
+    agent:
+      name: Alfred
+      system_prompt: |
+        You are Alfred, a read-only Kubernetes incident investigator for production.
+        Be concise, evidence-first, and never claim to have changed the cluster.
+      max_tokens: 4096
+      temperature: 0.2
+      max_turns: 8
+    tools:
+      shell:
+        enabled: false
+        enabled_in: [chat, serve]
+        allowlist: []
+        denylist: [rm, mkfs, dd, shutdown, reboot]
+        require_confirmation: true
+      read_file:
+        enabled: false
+        enabled_in: [chat, serve]
+        root_dir: .
+        max_bytes: 16384
+      kubernetes:
+        enabled: true
+        enabled_in: [serve]
+        mode: in_cluster
+        default_cluster: prod-ap
+        kubeconfig_path: ""
+        context: ""
+        namespace_allowlist: [payments]
+        max_pods: 20
+        max_events: 30
+        max_log_lines: 200
+        max_log_bytes: 16384
+        log_since: 15m
+      prometheus:
+        enabled: true
+        enabled_in: [serve]
+        mode: in_cluster
+        base_url: http://prometheus-operated.monitoring.svc:9090
+        bearer_token: ""
+        default_cluster: prod-ap
+        timeout: 10s
+        max_series: 10
+        max_samples: 120
+        default_step: 1m
+        default_lookback: 15m
+    clusters:
+      - name: prod-ap
+        kubernetes:
+          mode: in_cluster
+          kubeconfig_path: ""
+          context: ""
+          namespace_allowlist: [payments, checkout]
+        prometheus:
+          mode: in_cluster
+          base_url: http://prometheus-operated.monitoring.svc:9090
+          bearer_token: ""
+    security:
+      audit:
+        enabled: true
+        path: /var/log/alfred/audit.jsonl
+    telegram:
+      enabled: true
+      bot_token: ""
+    alertmanager:
+      enabled: true
+      agent_id: ""
+      telegram_chat_id: ""
+    gateway:
+      enabled: true
+      addr: ":8080"
+      read_timeout: 30s
+      write_timeout: 60s
+      shutdown_timeout: 30s
+      queue:
+        size: 200
+        workers: 5
+      session:
+        ttl: 2h
+        cleanup_interval: 10m
+      heartbeat:
+        enabled: false
+        file_path: HEARTBEAT.md
+        interval: 30m
+        agent_id: ""
