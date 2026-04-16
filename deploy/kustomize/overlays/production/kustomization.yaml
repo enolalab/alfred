@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: alfred
+
+resources:
+  - ../../base
+
+labels:
+  - pairs:
+      app.kubernetes.io/environment: production
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: alfred-config
+    files:
+      - config.yml
+
+patches:
+  - path: patch-clusterrolebinding.yaml

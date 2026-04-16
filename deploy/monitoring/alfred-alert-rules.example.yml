@@ -1,0 +1,54 @@
+# Example Prometheus alerting baseline for Alfred.
+# If you use Prometheus Operator, prefer the PrometheusRule example in the same directory.
+# Adapt thresholds and labels for your environment.
+
+groups:
+  - name: alfred-runtime
+    rules:
+      - alert: AlfredTargetDown
+        expr: up{job="alfred"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Alfred metrics target is down
+
+      - alert: AlfredTelegramDeliveryFailures
+        expr: increase(alfred_telegram_send_failures_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Alfred Telegram delivery failures detected in the last 5 minutes
+
+      - alert: AlfredInvestigationFailures
+        expr: increase(alfred_investigations_failed_total[10m]) > 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Alfred investigation failures detected in the last 10 minutes
+
+      - alert: AlfredQueuePressure
+        expr: alfred_queue_depth > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Alfred queue depth is elevated
+
+      - alert: AlfredInvestigationLatencyHigh
+        expr: alfred_investigation_duration_ms_average_ms > 10000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Alfred investigation latency average is elevated
+
+      - alert: AlfredToolLatencyHigh
+        expr: alfred_tool_call_latency_ms_average_ms > 3000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Alfred tool call latency average is elevated

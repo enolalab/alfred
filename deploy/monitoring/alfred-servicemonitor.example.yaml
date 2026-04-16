@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: alfred
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: alfred
+    # Add the label required by your Prometheus Operator stack, for example:
+    # release: kube-prometheus-stack
+spec:
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alfred
+  namespaceSelector:
+    matchNames:
+      - alfred
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      honorLabels: true

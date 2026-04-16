@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-telegram-api
+  namespace: alfred-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mock-telegram-api
+  template:
+    metadata:
+      labels:
+        app: mock-telegram-api
+    spec:
+      containers:
+        - name: mock-telegram-api
+          image: python:3.12-alpine
+          command: ["python", "/app/mock-telegram.py"]
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: app
+              mountPath: /app
+      volumes:
+        - name: app
+          configMap:
+            name: mock-telegram-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-telegram-api
+  namespace: alfred-lab
+spec:
+  selector:
+    app: mock-telegram-api
+  ports:
+    - port: 8081
+      targetPort: 8081
