@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -11,6 +12,8 @@ import (
 
 	alertmanagerIn "github.com/enolalab/alfred/internal/adapter/inbound/alertmanager"
 	"github.com/enolalab/alfred/internal/adapter/inbound/cli"
+	"github.com/enolalab/alfred/internal/adapter/inbound/cli/scanner"
+	"github.com/enolalab/alfred/internal/adapter/inbound/cli/wizard"
 	"github.com/enolalab/alfred/internal/adapter/inbound/gateway"
 	telegramIn "github.com/enolalab/alfred/internal/adapter/inbound/telegram"
 	anthropicAdapter "github.com/enolalab/alfred/internal/adapter/outbound/anthropic"
@@ -55,20 +58,66 @@ func run() error {
 	switch cmd {
 	case "chat":
 		return runChat()
+	case "scan":
+		return runScan()
 	case "replay":
 		return runReplay()
 	case "serve":
 		return runServe()
 	default:
-		return fmt.Errorf("unknown command: %s (available: chat, replay, serve)", cmd)
+		return fmt.Errorf("unknown command: %s (available: chat, scan, replay, serve)", cmd)
 	}
+}
+
+func runScan() error {
+	configPath := os.Getenv("ALFRED_CONFIG")
+	cfg, err := config.Load(configPath)
+	if err != nil {
+		if errors.Is(err, config.ErrOnboardingRequired) {
+			if wizardErr := wizard.Run(cfg); wizardErr != nil {
+				return fmt.Errorf("wizard setup failed: %w", wizardErr)
+			}
+			cfg, err = config.Load(configPath)
+			if err != nil {
+				return fmt.Errorf("load config after setup: %w", err)
+			}
+		} else {
+			return fmt.Errorf("load config: %w", err)
+		}
+	}
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
+	llmClient, err := createLLMClient(ctx, cfg)
+	if err != nil {
+		return err
+	}
+
+	toolDeps, err := createToolDependencies(cfg)
+	if err != nil {
+		return err
+	}
+
+	return scanner.Run(ctx, cfg, llmClient, toolDeps.KubernetesClient)
 }
 
 func runChat() error {
 	configPath := os.Getenv("ALFRED_CONFIG")
 	cfg, err := config.Load(configPath)
 	if err != nil {
-		return fmt.Errorf("load config: %w", err)
+		if errors.Is(err, config.ErrOnboardingRequired) {
+			if wizardErr := wizard.Run(cfg); wizardErr != nil {
+				return fmt.Errorf("wizard setup failed: %w", wizardErr)
+			}
+			// Reload config after wizard saves it
+			cfg, err = config.Load(configPath)
+			if err != nil {
+				return fmt.Errorf("load config after setup: %w", err)
+			}
+		} else {
+			return fmt.Errorf("load config: %w", err)
+		}
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -140,7 +189,18 @@ func runServe() error {
 	configPath := os.Getenv("ALFRED_CONFIG")
 	cfg, err := config.Load(configPath)
 	if err != nil {
-		return fmt.Errorf("load config: %w", err)
+		if errors.Is(err, config.ErrOnboardingRequired) {
+			if wizardErr := wizard.Run(cfg); wizardErr != nil {
+				return fmt.Errorf("wizard setup failed: %w", wizardErr)
+			}
+			// Reload config after wizard saves it
+			cfg, err = config.Load(configPath)
+			if err != nil {
+				return fmt.Errorf("load config after setup: %w", err)
+			}
+		} else {
+			return fmt.Errorf("load config: %w", err)
+		}
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

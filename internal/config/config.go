@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+var ErrOnboardingRequired = errors.New("onboarding required: missing LLM API key")
 
 type Config struct {
 	LLM          LLMConfig          `yaml:"llm"`
@@ -217,6 +220,9 @@ func Load(path string) (*Config, error) {
 	applyEnvOverrides(cfg)
 
 	if err := validate(cfg); err != nil {
+		if errors.Is(err, ErrOnboardingRequired) {
+			return cfg, err
+		}
 		return nil, err
 	}
 
@@ -483,16 +489,7 @@ func validate(cfg *Config) error {
 		return fmt.Errorf("unsupported llm.provider: %q (supported: anthropic, gemini, openrouter, openai)", cfg.LLM.Provider)
 	}
 	if cfg.LLM.APIKey == "" {
-		switch cfg.LLM.Provider {
-		case "anthropic":
-			return fmt.Errorf("API key required: set llm.api_key in config.yml or ANTHROPIC_API_KEY env var")
-		case "gemini":
-			return fmt.Errorf("API key required: set llm.api_key in config.yml or GEMINI_API_KEY env var")
-		case "openrouter":
-			return fmt.Errorf("API key required: set llm.api_key in config.yml or OPENROUTER_API_KEY env var")
-		case "openai":
-			return fmt.Errorf("API key required: set llm.api_key in config.yml or OPENAI_API_KEY env var")
-		}
+		return ErrOnboardingRequired
 	}
 	if cfg.Agent.MaxTokens <= 0 {
 		cfg.Agent.MaxTokens = 4096
@@ -759,4 +756,28 @@ func hasProductionProfile(profiles []ClusterProfile) bool {
 		}
 	}
 	return false
+}
+
+func (c *Config) Save(path string) error {
+	if path == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("get user home dir: %w", err)
+		}
+		path = filepath.Join(home, ".alfred", "config.yml")
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return fmt.Errorf("create config directory: %w", err)
+	}
+
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		return fmt.Errorf("marshal config: %w", err)
+	}
+
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		return fmt.Errorf("write config file: %w", err)
+	}
+	return nil
 }
