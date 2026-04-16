@@ -48,7 +48,7 @@ Look for:
 - HTTP `5xx` from Prometheus
 - TLS or auth failures
 - connection refused or timeout
-- circuit breaker opening after repeated retryable failures
+- `prometheus client circuit breaker is open` errors appearing after repeated retryable failures
 
 ## 4. Recover Safely
 

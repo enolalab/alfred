@@ -59,10 +59,15 @@ Counters to monitor:
 
 - `alerts_received_total`
 - `alerts_deduped_total`
+- `alerts_rate_limited_total`
 - `investigations_started_total`
 - `investigations_failed_total`
 - `tool_calls_total`
 - `telegram_send_failures_total`
+- `queue_rejections_total`
+
+Gauges to monitor:
+
 - `queue_depth`
 
 Timings to monitor:

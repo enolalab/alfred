@@ -27,7 +27,7 @@ Recommended naming:
 ```json
 {
   "id": "manual-crashloop-payments-api",
-  "description": "Manual Telegram investigation for a crashlooping pod",
+  "description": "Manual Telegram investigation for a crashlooping payments API pod in staging",
   "input": {
     "kind": "manual_message",
     "platform": "telegram",
@@ -44,11 +44,13 @@ Recommended naming:
     "must_reference": [
       "Summary",
       "Evidence",
+      "Likely causes",
       "Recommended next steps"
     ],
     "must_not_reference": [
       "I restarted",
-      "I rolled back"
+      "I rolled back",
+      "I changed the cluster"
     ],
     "evidence_themes": [
       "pod status",
@@ -97,9 +99,13 @@ Shape:
 {
   "kind": "alertmanager_payload",
   "payload": {
+    "version": "4",
     "groupKey": "prod-eu:High5xxRate:payments-api",
     "status": "firing",
     "receiver": "alfred",
+    "groupLabels": {
+      "alertname": "High5xxRate"
+    },
     "commonLabels": {
       "alertname": "High5xxRate",
       "cluster": "prod-eu",
@@ -115,6 +121,7 @@ Shape:
       {
         "status": "firing",
         "startsAt": "2026-04-02T10:00:00Z",
+        "endsAt": "",
         "fingerprint": "fp-1"
       }
     ]

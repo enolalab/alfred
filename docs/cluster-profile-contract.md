@@ -61,6 +61,8 @@ Expected setup:
 
 - `kubernetes.mode: in_cluster`
 - service account with read-only RBAC
+  - API Group `""`: `pods` (get, list), `pods/log` (get), `events` (list)
+  - API Group `apps`: `deployments` (get)
 - Prometheus usually addressed through in-cluster DNS
 
 ### `ex_cluster`
@@ -71,6 +73,7 @@ Expected setup:
 
 - `kubernetes.mode: ex_cluster`
 - `kubeconfig_path` or `context`
+- read-only RBAC access (same permissions as `in_cluster`)
 - network reachability to cluster API and Prometheus
 
 ## Namespace Scope

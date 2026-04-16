@@ -18,11 +18,13 @@ A starter Grafana import is available at:
 
 - current `alfred_queue_depth`
 - queue capacity from `/healthz`
+- `alfred_queue_rejections_total`
 
 ### 3. Inbound Alert Volume
 
 - `alfred_alerts_received_total`
 - `alfred_alerts_deduped_total`
+- `alfred_alerts_rate_limited_total`
 
 ### 4. Investigation Outcomes
 

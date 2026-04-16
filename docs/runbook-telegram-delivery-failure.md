@@ -46,6 +46,7 @@ Confirm:
 Look for:
 
 - repeated `5xx` responses from Telegram
+- `429 Too Many Requests` (rate limiting) from Telegram
 - transport or DNS failures
 - circuit-breaker open errors after repeated retryable failures
 

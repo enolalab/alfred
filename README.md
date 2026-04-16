@@ -57,19 +57,38 @@ The scanner executes a comprehensive health check:
 
 ---
 
-## 📚 Documentation
+## SRE & DevOps Documentation
 
-Beyond the CLI, Alfred operates as a robust gateway system capable of ingesting Alertmanager webhooks and orchestrating automated incident response via Telegram.
+For SREs and DevOps engineers, Alfred provides comprehensive documentation on production readiness, observability, incident response, and security guarantees.
 
-Explore the documentation for advanced configurations and architectural details:
+### 1. Deployment Safety & Risk Management
+* [Production Baseline Checklist](docs/production-baseline-checklist.md) & [Reliability Baseline](docs/reliability-baseline-checklist.md)
+* [Canary Rollout Checklist](docs/canary-rollout-checklist.md) & [First Production Canary](docs/first-production-canary.md)
+* [Release Quality Gate](docs/release-quality-gate.md) & [Release Signoff Governance](docs/release-signoff-governance.md)
+* [Deploy Runbook](docs/deploy-runbook.md) & [Rollback Runbook](docs/rollback-runbook.md)
 
-* 📋 **[Feature Specifications](ALFRED_FEATURES.md)**
-* 📖 **[Detailed Onboarding Guide](docs/ONBOARDING_GUIDE.md)**
-* 🛠️ **[UX Optimization & Architecture Plan](UX_OPTIMIZATION_PLAN.md)**
+### 2. Observability & Monitoring
+* [Monitoring Baseline](docs/alfred-monitoring-baseline.md)
+* [Grafana Dashboard Notes](deploy/monitoring/alfred-dashboard-notes.md)
+
+### 3. Incident Response & Runbooks
+* [Runbook: Alfred Down](docs/runbook-alfred-down.md)
+* [Runbook: K8s API Auth Failure](docs/runbook-k8s-api-auth-failure.md)
+* [Runbook: Prometheus Unreachable](docs/runbook-prometheus-unreachable.md)
+* [Runbook: Cluster Profile Misconfigured](docs/runbook-cluster-profile-misconfigured.md)
+* [Runbook: Telegram Delivery Failure](docs/runbook-telegram-delivery-failure.md)
+
+### 4. Testing & Replays
+* [Replay Fixture Format](docs/replay-fixture-format.md)
+* [Replay Review Checklist](docs/replay-review-checklist.md)
+
+### 5. Security & RBAC
+* [Cluster Profile Contract](docs/cluster-profile-contract.md)
+* [Read-Only RBAC Role](deploy/k8s/alfred-clusterrole-readonly.yaml)
 
 ---
 
-## 🛡️ Security & Compliance
+## Security & Compliance
 
 Security is a foundational tenet of Alfred's architecture. 
 
